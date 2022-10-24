@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.phonewallet11">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/logo"
+        android:label="手机钱包"
+        android:roundIcon="@mipmap/logo"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name="com.example.phonewallet11.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.Caidan"
+            android:label="Caidan" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.UserActivity"
+            android:label="首页" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.Bbb1Activity"
+            android:label="下载图片" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.RegisterActivity"
+            android:label="Register" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.XxActivity"
+            android:label="电费查询" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.GpActivity"
+            android:label="股票查询" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.GmActivity"
+            android:label="股票购买记录查询" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.ZzjiluActivity"
+            android:label="转账记录查询" >
+        </activity>
+
+        <activity
+            android:name="com.example.phonewallet11.MoneyActivity"
+            android:label="Money" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.AddMoneyActivity"
+            android:label="AddMoney" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.CutMoneyActivity"
+            android:label="CutMoney" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.CardActivity"
+            android:label="Card" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.CardxykActivity"
+            android:label="Cardxyk" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.AddCardActivity"
+            android:label="AddCard" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.AddxykCardActivity"
+            android:label="AddxykCard" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.OneselfActivity"
+            android:label="Oneself" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.paypwdActivity"
+            android:label="paypwd" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.UpuserActivity"
+            android:label="修改信息" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.ShoujiActivity"
+            android:label="Shouji" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.XiaoxiActivity"
+            android:label="Xiaoxi" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.CxActivity"
+            android:label="电费查询成功界面" >
+        </activity>
+
+        <activity
+            android:name="com.example.phonewallet11.Userht"
+            android:label="用户管理后台" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.Kamianinfo1"
+            android:label="卡面" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.Bbb2Activity"
+            android:label="欢迎使用" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.FriendActivity"
+            android:label="好友" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.AddFriendActivity"
+            android:label="添加好友" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.MyActivity"
+            android:label="关于我的" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.ZzActivity"
+            android:label="好友转账" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.ZhangdanActivity"
+            android:label="我的账单" >
+        </activity>
+        <activity
+            android:name="com.example.phonewallet11.XykActivity"
+            android:label="信用卡提现" >
+        </activity>
+
+        <activity android:name="com.example.phonewallet11.ChatActivitiy"
+            />
+
+    </application>
+
+
+</manifest>

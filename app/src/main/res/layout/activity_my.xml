@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/b"
+    android:layout_gravity="center"
+
+    >
+    <LinearLayout
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content">
+
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:textSize="40dp"
+            android:paddingTop="10dp"
+            android:background="#a2dbfd"
+            android:text="个人信息" />
+
+
+        <Button
+            android:id="@+id/button6"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#8ad3fe"
+            android:paddingTop="10dp"
+            android:textSize="35dp"
+            android:text="银行卡" />
+
+
+        <Button
+            android:id="@+id/button66"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#8ad3fe"
+            android:paddingTop="10dp"
+            android:textSize="35dp"
+            android:text="信用卡" />
+
+        <Button
+            android:id="@+id/button7"
+            android:layout_width="match_parent"
+            android:layout_height="74dp"
+            android:background="#73d0fe"
+            android:paddingTop="10dp"
+            android:text="我的账单"
+            android:textSize="30dp" />
+        <Button
+            android:id="@+id/buttongp"
+            android:layout_width="match_parent"
+            android:layout_height="74dp"
+            android:background="#73d0fe"
+            android:paddingTop="10dp"
+            android:text="股票"
+            android:textSize="30dp" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#69c9ff"
+            android:paddingTop="10dp"
+            android:text="银行卡余额"
+            android:textSize="30dp" />
+        <Button
+            android:id="@+id/gaima"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#51c2ff"
+            android:paddingTop="10dp"
+            android:text="修改支付密码"
+            android:textSize="30dp" />
+
+        <Button
+            android:id="@+id/btnxx"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#37BAFC"
+            android:text="电费查询"
+            android:textSize="30sp" />
+        <Button
+            android:id="@+id/xyk"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#20A8EB"
+            android:text="信用卡提现"
+            android:textSize="30sp" />
+
+        <Button
+            android:id="@+id/huanying"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#37BAFC"
+            android:text="欢迎使用！"
+            android:textSize="30sp" />
+        <Button
+            android:id="@+id/kamian"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#20A8EB"
+            android:text="卡面介绍！"
+            android:textSize="30sp" />
+
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

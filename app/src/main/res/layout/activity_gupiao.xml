@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/b">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivzyj"
+                android:layout_width="400dp"
+                android:layout_height="200dp"
+                android:layout_below="@+id/tv_city"
+                android:layout_alignStart="@+id/ll_btn"
+                android:layout_alignLeft="@+id/ll_btn"
+                android:layout_gravity="center"
+                android:src="@drawable/zyj1" />
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="154dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvzyj1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/iv_icon"
+            android:layout_alignRight="@+id/iv_icon"
+            android:gravity="center"
+            android:text="产品编号："
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvzyj2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/iv_icon"
+            android:layout_alignRight="@+id/iv_icon"
+            android:gravity="center"
+            android:text="产品名称："
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvzyj3"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="交易起点金额："
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvzyj4"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="销售地区："
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvzyj5"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="开售时间："
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvzyj6"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="始发公司："
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvzyj7"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="募集期："
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btnzyj1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="产品1" />
+
+        <Button
+            android:id="@+id/btnzyj2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="产品2" />
+
+        <Button
+            android:id="@+id/btnzyj3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="产品3" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/btnzyj5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20sp"
+        android:text=" 购买 "
+        android:onClick="save"
+        />
+    <Button
+        android:id="@+id/btnzyj4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20sp"
+        android:text=" 我的购买 "
+        android:onClick="save"
+        />
+    </LinearLayout>
