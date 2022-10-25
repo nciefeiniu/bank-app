@@ -44,6 +44,7 @@ import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -260,27 +261,11 @@ public class MainActivity extends AppCompatActivity {
 
                 final Login loginResult = gson.fromJson(response.body().charStream(), Login.class);
                 Integer code = loginResult.getCode();
-                if (code.equals(501)) {
+                if (!code.equals(200)) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, "数据提交不全",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else if (code.equals(502)) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "账号不存在",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else if (code.equals(503)) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "账号或密码不正确！",
+                            Toast.makeText(MainActivity.this, loginResult.getMessage(),
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
