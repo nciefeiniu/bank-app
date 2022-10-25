@@ -26,15 +26,31 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.phonewallet11.api_response.addCard.Data;
+import com.example.phonewallet11.api_response.addCard.AddCard;
+import com.example.phonewallet11.okhttpClientManager.clientManager;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 public class AddCardActivity extends Activity {
 
-    private EditText etAddCard,etTel,etId;
+    private EditText etAddCard, etTel, etId;
 
     private Button btok;
-    private  String  i,id,AddCard;
+    private String i, id, AddCard;
     private Intent intent;
 
     private boolean isPause = false;   //是否暂停
@@ -49,12 +65,12 @@ public class AddCardActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addcard);
-        intent=getIntent();
-        id=intent.getStringExtra("id");
-        etId=(EditText) findViewById(R.id.etId);
-        etAddCard=(EditText) findViewById(R.id.etAddCard);
+        intent = getIntent();
+        id = intent.getStringExtra("id");
+        etId = (EditText) findViewById(R.id.etId);
+        etAddCard = (EditText) findViewById(R.id.etAddCard);
         //etTel=(EditText) findViewById(R.id.etTel);
-        btok=(Button) findViewById(R.id.btOk);
+        btok = (Button) findViewById(R.id.btOk);
 
 
         //获取布局中的所有按钮控件
@@ -65,30 +81,24 @@ public class AddCardActivity extends Activity {
         surfaceView = findViewById(R.id.surfaceView);
 
 
-
-
         //创建播放器对象并设置音频/视频数据源
 
-        player=MediaPlayer.create(this,R.raw.wwbjk);
+        player = MediaPlayer.create(this, R.raw.wwbjk);
 
 
         // 为MediaPlayer对象添加完成事件监听器
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
-
-        {
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
-            public void onCompletion (MediaPlayer mp){
+            public void onCompletion(MediaPlayer mp) {
                 //重新开始播放
                 player.start();
 
             }
         });
         //设置按钮的单击事件监听器
-        play.setOnClickListener(new View.OnClickListener()
-
-        {
+        play.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick (View v){
+            public void onClick(View v) {
                 //获取SurfaceView控件的管理器SurfaceHolder
                 // 设置SurfaceHolder类型
                 // 将SurfaceView控件与MediaPlayer类进行关联
@@ -124,11 +134,9 @@ public class AddCardActivity extends Activity {
             }
         });
 
-        pause.setOnClickListener(new View.OnClickListener()
-
-        {
+        pause.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick (View v){
+            public void onClick(View v) {
                 /*判断当前是否正在播放并且没有处于暂停状态，
                 若是则暂停播放、设置暂停标记isPause为true并将“暂停”按钮文本内容设置为“继续”；
                 否则继续播放、设置暂停标记isPause为false并将“暂停”按钮文本内容设置为“暂停”
@@ -148,11 +156,9 @@ public class AddCardActivity extends Activity {
         });
 
 
-        stop.setOnClickListener(new View.OnClickListener()
-
-        {
+        stop.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick (View v){
+            public void onClick(View v) {
                 /* 判断播放器对象是否为null，若是则停止播放、
                 并在调用stop后设置再次通过start进行播放前调用prepare函数。
                  */
@@ -167,9 +173,10 @@ public class AddCardActivity extends Activity {
             }
         });
     }
+
     @Override
     protected void onDestroy() {
-        if(player.isPlaying()){
+        if (player.isPlaying()) {
             player.stop();   //停止音频的播放
         }
         player.release();     //释放资源
@@ -177,56 +184,46 @@ public class AddCardActivity extends Activity {
     }
 
 
+    public void register(View v) {
+        AddCard = etAddCard.getText().toString();
+        if (!AddCard.equals("")) {
 
 
-
-
-
-
-
-
-
-
-    public void register(View v){
-        AddCard=etAddCard.getText().toString();
-        if(!AddCard.equals("")){
-
-
-
-            final AlertDialog.Builder builder=new AlertDialog.Builder(this);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("确认增加吗？");
             AlertDialog.Builder builder1 = builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface arg0, int arg1) {
                     // TODO Auto-generated method stub
 
-                    if (etId.getText().toString().equals(id)){
-                        final DatebaseHelper dbHelper1 = new DatebaseHelper(getApplicationContext());
-                        Cursor c = dbHelper1.querykbb(AddCard);
-                        c.moveToFirst();
-
-                        if (c.getCount()!=0){
-                            etAddCard.setText("");
-                            Toast.makeText(AddCardActivity.this, "该银行卡已存在！", Toast.LENGTH_SHORT).show();
-                        }else {
-
-
-                            final DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
-
-                            final ContentValues values = new ContentValues();
-                            values.put("_id", etAddCard.getText().toString());
-                            values.put("k_sfz", id);
-                            //values.put("k_phone", etTel.getText().toString());
-
-                            i = Integer.toString(dbHelper.insertCard(values));
-
-
-                            Log.v("增加bankscard", i);
-
-                            Toast.makeText(AddCardActivity.this, "银行卡添加成功！！", Toast.LENGTH_SHORT).show();
-                            setResult(1, intent);
-                            finish();
-                        }
+                    if (etId.getText().toString().equals(id)) {
+                        AddCardActivity.this.addCard(AddCard, id);
+//                        final DatebaseHelper dbHelper1 = new DatebaseHelper(getApplicationContext());
+//                        Cursor c = dbHelper1.querykbb(AddCard);
+//                        c.moveToFirst();
+//
+//                        if (c.getCount() != 0) {
+//                            etAddCard.setText("");
+//                            Toast.makeText(AddCardActivity.this, "该银行卡已存在！", Toast.LENGTH_SHORT).show();
+//                        } else {
+//
+//
+//                            final DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
+//
+//                            final ContentValues values = new ContentValues();
+//                            values.put("_id", etAddCard.getText().toString());
+//                            values.put("k_sfz", id);
+//                            //values.put("k_phone", etTel.getText().toString());
+//
+//                            i = Integer.toString(dbHelper.insertCard(values));
+//
+//
+//                            Log.v("增加bankscard", i);
+//
+//                            Toast.makeText(AddCardActivity.this, "银行卡添加成功！！", Toast.LENGTH_SHORT).show();
+//                            setResult(1, intent);
+//                            finish();
+//                        }
                     } else {
 
                         Toast.makeText(AddCardActivity.this, "身份证号错误，请重新输入！", Toast.LENGTH_SHORT).show();
@@ -236,7 +233,7 @@ public class AddCardActivity extends Activity {
                 }
 
             });
-            builder.setNegativeButton("取消", new DialogInterface.OnClickListener(){
+            builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface arg0, int arg1) {
                     // TODO Auto-generated method stub
@@ -246,9 +243,60 @@ public class AddCardActivity extends Activity {
 
             });
             builder.create().show();
-        }else{
+        } else {
             Toast.makeText(AddCardActivity.this, "请输入银行卡号！", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void addCard(String cardNo, String IDNumber) {
+        final Gson gson = new Gson();
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        JSONObject json = new JSONObject();
+        try {
+            json.put("card_no", cardNo);
+            json.put("id_number", IDNumber);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        OkHttpClient client = clientManager.getInstance().mOkHttpClient; // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("add_card/");
+
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+        Request request = new Request.Builder().url(url).post(requestBody).build(); // 创建一个请求
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                final AddCard addCardResult = gson.fromJson(response.body().charStream(), AddCard.class);
+                Integer code = addCardResult.getCode();
+                if (!code.equals(200)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(AddCardActivity.this, addCardResult.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(AddCardActivity.this, "银行卡添加成功！！", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(AddCardActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
 

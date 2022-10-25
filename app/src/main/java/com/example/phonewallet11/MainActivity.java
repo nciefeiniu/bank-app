@@ -52,6 +52,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import com.example.phonewallet11.api_response.login.Login;
+import com.example.phonewallet11.okhttpClientManager.clientManager;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -248,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        OkHttpClient client = new OkHttpClient(); // 创建OkHttpClient对象
+        OkHttpClient client = clientManager.getInstance().mOkHttpClient; // 创建OkHttpClient对象
         String url = new ApiBaseUrl().assemblyUrl("login/");
 
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
