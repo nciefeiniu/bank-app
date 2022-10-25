@@ -16,17 +16,28 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.widget.Button;
 
 import java.io.IOException;
+import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import com.example.phonewallet11.api_response.checkAccountExists.CheckAccountExists;
+import com.example.phonewallet11.api_response.register.Register;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class RegisterActivity extends Activity {
@@ -178,16 +189,139 @@ public class RegisterActivity extends Activity {
         super.onDestroy();
     }
 
+    public void checkUserExists() {
+        final Gson gson = new Gson();
+        OkHttpClient client = new OkHttpClient(); // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("check_account_exists");
+        Request request = new Request.Builder().url(url).build(); // 创建一个请求
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                CheckAccountExists accountExists = gson.fromJson(response.body().charStream(), CheckAccountExists.class);
+
+                if (!accountExists.getSuccess().equals(true)) {
+                    Toast.makeText(RegisterActivity.this, accountExists.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    if (accountExists.getData().getExists().equals(true)) {
+                        Toast.makeText(RegisterActivity.this, "账号已存在",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(RegisterActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void sendRegisterHandle(ContentValues values) {
+        final Gson gson = new Gson();
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        JSONObject json = new JSONObject();
+
+        for (Map.Entry<String, Object> item : values.valueSet()) {
+            try {
+                json.put(item.getKey(), item.getValue().toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        OkHttpClient client = new OkHttpClient(); // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("register/");
+
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+        Request request = new Request.Builder().url(url).post(requestBody).build(); // 创建一个请求
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                Register registerResult = gson.fromJson(response.body().charStream(), Register.class);
+                Integer code = registerResult.getCode();
+                if (code.equals(501)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(RegisterActivity.this, "数据提交不全",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else if (code.equals(601)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(RegisterActivity.this, "账号已存在",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else if (code.equals(602)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(RegisterActivity.this, "该身份证号码已注册过账号！",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                else if (registerResult.getSuccess().equals(true)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            final AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                            builder.setMessage("注册成功，请登录！");
+                            builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //返回登录界面
+                                    Intent intent = getIntent();
+                                    setResult(1, intent);
+                                    finish();
+                                }
+                            });
+                            builder.create().show();
+
+
+                        }
+                    });
+
+                } else {
+                    Toast.makeText(RegisterActivity.this, "注册失败，",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(RegisterActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void register(View v) {
+
         if (name.getText().toString().equals("") || (account.getText().toString()).equals("") || login_password.getText().toString().equals("")) {
             Toast.makeText(RegisterActivity.this, "请先填写资料！", Toast.LENGTH_SHORT).show();
 
         } else {
             String ac = account.getText().toString();
-            DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
-            Cursor c = dbHelper.loginquery(ac);
+//            DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
+//            Cursor c = dbHelper.loginquery(ac);
 
-            if (c.getCount() > 0) {
+            if (-1 > 0) {
                 Toast.makeText(RegisterActivity.this, "账号已存在！", Toast.LENGTH_SHORT).show();
                 account.setText("");
             } else {
@@ -208,8 +342,6 @@ public class RegisterActivity extends Activity {
                         password.setText("");
                         login_password.setText("");
                     } else {
-
-
                         RadioButton rb = (RadioButton) findViewById(rg.getCheckedRadioButtonId());
                         String xbei = rb.getText().toString();
 
@@ -224,29 +356,31 @@ public class RegisterActivity extends Activity {
                         values.put("qx", "qwe");
                         values.put("money", "0");
 
-                        final DatebaseHelper dbHelper1 = new DatebaseHelper(getApplicationContext());
-                        String g = Integer.toString(dbHelper1.insert(values));
-                        Log.v("debug", g);
-                        //如果数据添加失败，返回值是-1
-                        if (!g.equals("-1")) {
-                            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                            builder.setMessage("注册成功，请登录！");
-                            builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    //返回登录界面
-                                    Intent intent = getIntent();
-                                    setResult(1, intent);
-                                    finish();
-                                }
-                            });
-                            builder.create().show();
+                        this.sendRegisterHandle(values);
 
-                        } else {
-                            Toast.makeText(RegisterActivity.this, "您已申请过账号！", Toast.LENGTH_SHORT).show();
-                            account.setText("");
-                            id.setText("");
-                        }
+//                        final DatebaseHelper dbHelper1 = new DatebaseHelper(getApplicationContext());
+//                        String g = Integer.toString(dbHelper1.insert(values));
+//                        Log.v("debug", g);
+                        //如果数据添加失败，返回值是-1
+//                        if (!g.equals("-1")) {
+//                            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//                            builder.setMessage("注册成功，请登录！");
+//                            builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    //返回登录界面
+//                                    Intent intent = getIntent();
+//                                    setResult(1, intent);
+//                                    finish();
+//                                }
+//                            });
+//                            builder.create().show();
+//
+//                        } else {
+//                            Toast.makeText(RegisterActivity.this, "您已申请过账号！", Toast.LENGTH_SHORT).show();
+//                            account.setText("");
+//                            id.setText("");
+//                        }
                     }
 
                 }
