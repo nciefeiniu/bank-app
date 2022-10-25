@@ -23,11 +23,26 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.phonewallet11.okhttpClientManager.clientManager;
+import com.example.phonewallet11.rechargePhone.RechargePhone;
+import com.example.phonewallet11.transferAccounts.TransferAccounts;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 public class ZzActivity extends AppCompatActivity {
@@ -65,7 +80,8 @@ public class ZzActivity extends AppCompatActivity {
         btnzyj7.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(ZzActivity.this, "转账成功！", Toast.LENGTH_SHORT).show();
+                ZzActivity.this.save(view);
+//                Toast.makeText(ZzActivity.this, "转账成功！", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -82,75 +98,127 @@ public class ZzActivity extends AppCompatActivity {
             Toast.makeText(ZzActivity.this, "请输入金额！", Toast.LENGTH_SHORT).show();
         }else{
 
-            float money1=Float.parseFloat(money.getText().toString());
+            double money1=Double.parseDouble(money.getText().toString());
 
 
 
-
-            if(money1<=moneys) {
-                //连接数据库
-                DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
-
-                Cursor c = dbHelper.queryzz(phone.getText().toString(),name.getText().toString() );
-                String r_name=name.getText().toString();
-                if (c.getCount() !=0) {
-                    c.moveToFirst();
-                    if (ppwd.equals(pwd.getText().toString())){
-                        DatebaseHelper dbHelper1 = new DatebaseHelper(getApplicationContext());
-                        ContentValues values = new ContentValues();
-                        values.put("money",moneys-money1 );
-                        dbHelper1.updateuser(values,id);
-                        finish();
-                        //插入记录
-                        DatebaseHelper dbHelperRecord = new DatebaseHelper(getApplicationContext());
-                        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        String time=sdf.format(new java.util.Date());
-                        final ContentValues value=new ContentValues();//存储值
-                        value.put("_id",intent.getStringExtra("id"));
-                        value.put("r_name",r_name);
-                        value.put("r_mode","转出");
-                        value.put("r_money",money1);
-                        value.put("r_time",time);
-                        dbHelperRecord.insertRecord(value);
-
-                        Toast.makeText(ZzActivity.this, "转账成功！", Toast.LENGTH_SHORT).show();
-                        ContentValues values1 = new ContentValues();
-                        values1.put("money",c.getFloat(8)+money1 );
-                        dbHelper1.updateuser(values1,c.getString(0));
-
-
-                        //插入记录
-                        DatebaseHelper dbHelperRecord2 = new DatebaseHelper(getApplicationContext());
-                        final ContentValues value2=new ContentValues();//存储值
-                        value2.put("_id",c.getString(0));
-                        value2.put("r_name",intent.getStringExtra("name"));
-                        value2.put("r_mode","转入");
-                        value2.put("r_money", money1);
-                        value2.put("r_time",time);
-                        dbHelperRecord2.insertRecord(value2);
-
-
-                        intent.putExtra("moneys", moneys-money1);
-                        intent.setClass(ZzActivity.this,FriendActivity.class);
-                        startActivity(intent);
-
-                    }else {
-                        pwd.setText("");
-                        Toast.makeText(ZzActivity.this, "支付密码不正确！", Toast.LENGTH_SHORT).show();
-                    }
-
-                }else {
-                    Toast.makeText(ZzActivity.this, "该好友不存在！", Toast.LENGTH_SHORT).show();
-                }
-
-            }else{
-                money.setText("");
-                System.out.println(money1);
-                System.out.println(moneys);
-                Toast.makeText(ZzActivity.this, "余额不足！", Toast.LENGTH_SHORT).show();
-            }
+            this.transferAccounts(money1, name.getText().toString(), phone.getText().toString(), pwd.getText().toString());
+//            if(money1<=moneys) {
+//                //连接数据库
+//                DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
+//
+//                Cursor c = dbHelper.queryzz(phone.getText().toString(),name.getText().toString() );
+//                String r_name=name.getText().toString();
+//                if (c.getCount() !=0) {
+//                    c.moveToFirst();
+//                    if (ppwd.equals(pwd.getText().toString())){
+//                        DatebaseHelper dbHelper1 = new DatebaseHelper(getApplicationContext());
+//                        ContentValues values = new ContentValues();
+//                        values.put("money",moneys-money1 );
+//                        dbHelper1.updateuser(values,id);
+//                        finish();
+//                        //插入记录
+//                        DatebaseHelper dbHelperRecord = new DatebaseHelper(getApplicationContext());
+//                        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                        String time=sdf.format(new java.util.Date());
+//                        final ContentValues value=new ContentValues();//存储值
+//                        value.put("_id",intent.getStringExtra("id"));
+//                        value.put("r_name",r_name);
+//                        value.put("r_mode","转出");
+//                        value.put("r_money",money1);
+//                        value.put("r_time",time);
+//                        dbHelperRecord.insertRecord(value);
+//
+//                        Toast.makeText(ZzActivity.this, "转账成功！", Toast.LENGTH_SHORT).show();
+//                        ContentValues values1 = new ContentValues();
+//                        values1.put("money",c.getFloat(8)+money1 );
+//                        dbHelper1.updateuser(values1,c.getString(0));
+//
+//
+//                        //插入记录
+//                        DatebaseHelper dbHelperRecord2 = new DatebaseHelper(getApplicationContext());
+//                        final ContentValues value2=new ContentValues();//存储值
+//                        value2.put("_id",c.getString(0));
+//                        value2.put("r_name",intent.getStringExtra("name"));
+//                        value2.put("r_mode","转入");
+//                        value2.put("r_money", money1);
+//                        value2.put("r_time",time);
+//                        dbHelperRecord2.insertRecord(value2);
+//
+//
+//                        intent.putExtra("moneys", moneys-money1);
+//                        intent.setClass(ZzActivity.this,FriendActivity.class);
+//                        startActivity(intent);
+//
+//                    }else {
+//                        pwd.setText("");
+//                        Toast.makeText(ZzActivity.this, "支付密码不正确！", Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                }else {
+//                    Toast.makeText(ZzActivity.this, "该好友不存在！", Toast.LENGTH_SHORT).show();
+//                }
+//
+//            }else{
+//                money.setText("");
+//                System.out.println(money1);
+//                System.out.println(moneys);
+//                Toast.makeText(ZzActivity.this, "余额不足！", Toast.LENGTH_SHORT).show();
+//            }
         }
 
+    }
+
+    public void transferAccounts(final double money, String name, String phone, String password) {
+        final Gson gson = new Gson();
+
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        JSONObject json = new JSONObject();
+        try {
+            json.put("money", money);
+            json.put("pay_password", password);
+            json.put("name", name);
+            json.put("phone", phone);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        OkHttpClient client = clientManager.getInstance().mOkHttpClient; // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("transfer_accounts/");
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+
+        Request request = new Request.Builder().url(url).post(requestBody).build(); // 创建一个请求
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                final TransferAccounts transferAccountsResult = gson.fromJson(response.body().charStream(), TransferAccounts.class);
+                Integer code = transferAccountsResult.getCode();
+                if (!code.equals(200)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ZzActivity.this, transferAccountsResult.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ZzActivity.this, "转账成功！转账金额：" + money + "元", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(ZzActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }
