@@ -1,5 +1,7 @@
 package com.example.phonewallet11;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -11,6 +13,8 @@ import android.os.Message;
 
 import android.view.View;
 
+import com.example.phonewallet11.api_response.login.Data;
+import com.example.phonewallet11.api_response.register.Register;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -27,26 +31,32 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.time.Year;
+//import java.time.Year;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
-
+import com.example.phonewallet11.api_response.login.Login;
 
 
 public class MainActivity extends AppCompatActivity {
     public static int USERID;
-    private Button btsubmit,btreg;
-    private EditText etaccount,etlogin_password;
+    private Button btsubmit, btreg;
+    private EditText etaccount, etlogin_password;
     private Intent intent;
 
     private TextView tvCity3;
@@ -55,21 +65,21 @@ public class MainActivity extends AppCompatActivity {
     private ImageView ivIcon3;
     private Button btntj, btncq, btnyn;
     private Map<String, String> map;
-    private  List<Map<String, String>> list;
-    private String year,num2,name2;
-    String urlStr6= "http://192.168.43.222:8080/TestServer/year.json";
+    private List<Map<String, String>> list;
+    private String year, num2, name2;
+    String urlStr6 = "http://192.168.43.222:8080/TestServer/year.json";
 
-    final Handler handler=new Handler(Looper.getMainLooper()){
+    final Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             //获取子线程传递过来的json数据并保存到变量中
-            String json= (String) msg.obj;
+            String json = (String) msg.obj;
             List<YearInfo> yearInfos = null;
 
             //调用getInfosFromJson()方法，将天气信息集合保存到yearInfos中
             try {
-                yearInfos=getInfosFromJson(json);
+                yearInfos = getInfosFromJson(json);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -88,18 +98,20 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
     //解析json数据返回天气信息的集合
     public static List<YearInfo> getInfosFromJson(String json)
-            throws IOException {        ;
+            throws IOException {
+        ;
         //使用gson库解析JSON数据
         Gson gson = new Gson();
-        Type listType = new  TypeToken<List<YearInfo>>(){}.getType();
-        List<YearInfo> list=gson.fromJson(json,listType);
+        Type listType = new TypeToken<List<YearInfo>>() {
+        }.getType();
+        List<YearInfo> list = gson.fromJson(json, listType);
 
         return list;
 
     }
-
 
 
     @Override
@@ -107,11 +119,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //        intent =getIntent();
-        btsubmit=(Button) findViewById(R.id.submit);
+        btsubmit = (Button) findViewById(R.id.submit);
         btreg = (Button) findViewById(R.id.reg);
 
-        etaccount=(EditText) findViewById(R.id.account);
-        etlogin_password=(EditText) findViewById(R.id.login_password);
+        etaccount = (EditText) findViewById(R.id.account);
+        etlogin_password = (EditText) findViewById(R.id.login_password);
 
         // 初始化控件
         tvCity3 = (TextView) findViewById(R.id.tv_city3);
@@ -163,84 +175,156 @@ public class MainActivity extends AppCompatActivity {
         btnyn.setOnClickListener(listener);
 
 
-
-
-
-
-
-
-
-
-
         btsubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String account=etaccount.getText().toString();
-                String password=etlogin_password.getText().toString();
-//                String id=intent.getStringExtra("id");
-//                Intent intent=new Intent();
+                String account = etaccount.getText().toString();
+                String password = etlogin_password.getText().toString();
 
-                if(account.equals("")){
+                if (account.equals("")) {
                     Toast.makeText(MainActivity.this, "用户名为空", Toast.LENGTH_SHORT).show();
-                }else if(account.equals("admin")&&password.equals("admin")){
-                    Intent aa=new Intent(MainActivity.this,Userht.class);
+                } else if (account.equals("admin") && password.equals("admin")) {
+                    Intent aa = new Intent(MainActivity.this, Userht.class);
                     startActivity(aa);
-                }else{
+                } else {
+                    MainActivity.this.sendLoginData(account, password);
+//                    DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
+//                    Cursor c = dbHelper.loginquery(account);
+//
+//                    if (c.getCount() != 0) {
+//                        c.moveToFirst();
+//                        String login_pwd = c.getString(6);
+//                        if (password.equals(login_pwd)) {
+//
+//                            Intent intent = new Intent(MainActivity.this, Caidan.class);
+//                            intent.putExtra("id", c.getString(0));
+//                            intent.putExtra("account", c.getString(1));
+//                            intent.putExtra("name", c.getString(2));
+//                            intent.putExtra("sex", c.getString(3));
+//                            intent.putExtra("phone", c.getString(4));
+//                            intent.putExtra("qx", c.getString(5));
+//                            intent.putExtra("login_password", c.getString(6));
+//                            intent.putExtra("pay_password", c.getString(7));
+//                            // String moneys=String.valueOf(c.getFloat(8));
+//                            intent.putExtra("moneys", c.getFloat(8));
+//
+//                            startActivity(intent);
+//                            //0代表MODE_PRIVATE私有模式
+//                            SharedPreferences sp = getSharedPreferences("usermemory", 0);
+//                            SharedPreferences.Editor ed = sp.edit();
+//                            ed.putString("name", c.getString(c.getColumnIndex("name")));
+//
+//
+//                            ed.commit();
+//                        } else {
+//                            Toast.makeText(MainActivity.this, "密码错误", Toast.LENGTH_SHORT).show();
+//                        }
 
-                    DatebaseHelper dbHelper=new DatebaseHelper(getApplicationContext());
-                    Cursor c=dbHelper.loginquery(account);
-
-                    if(c.getCount()!=0){
-                        c.moveToFirst();
-                        String login_pwd=c.getString(6);
-                        if(password.equals(login_pwd)){
-
-                            Intent intent=new Intent(MainActivity.this,Caidan.class);
-                            intent.putExtra("id", c.getString(0));
-                            intent.putExtra("account", c.getString(1));
-                            intent.putExtra("name", c.getString(2));
-                            intent.putExtra("sex", c.getString(3));
-                            intent.putExtra("phone", c.getString(4));
-                            intent.putExtra("qx", c.getString(5));
-                            intent.putExtra("login_password", c.getString(6));
-                            intent.putExtra("pay_password", c.getString(7));
-                            // String moneys=String.valueOf(c.getFloat(8));
-                            intent.putExtra("moneys", c.getFloat(8));
-
-                            startActivity(intent);
-                            //0代表MODE_PRIVATE私有模式
-                            SharedPreferences sp=getSharedPreferences("usermemory",0);
-                            SharedPreferences.Editor ed=sp.edit();
-                            ed.putString("name", c.getString(c.getColumnIndex("name")));
-
-
-                            ed.commit();
-                        }else{
-                            Toast.makeText(MainActivity.this, "密码错误", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }else{
-                        Toast.makeText(MainActivity.this, "没有此用户，请注册！", Toast.LENGTH_SHORT).show();
-                    }
+//                    } else {
+//                        Toast.makeText(MainActivity.this, "没有此用户，请注册！", Toast.LENGTH_SHORT).show();
+//                    }
                 }
             }
         });
         btreg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent1=new Intent();
-                intent1.setClass(MainActivity.this,RegisterActivity.class);
+                Intent intent1 = new Intent();
+                intent1.setClass(MainActivity.this, RegisterActivity.class);
                 startActivity(intent1);
             }
         });
     }
 
+    public void sendLoginData(String account, String password) {
+        final Gson gson = new Gson();
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        JSONObject json = new JSONObject();
+        try {
+            json.put("account", account);
+            json.put("login_password", password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        OkHttpClient client = new OkHttpClient(); // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("login/");
+
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+        Request request = new Request.Builder().url(url).post(requestBody).build(); // 创建一个请求
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                final Login loginResult = gson.fromJson(response.body().charStream(), Login.class);
+                Integer code = loginResult.getCode();
+                if (code.equals(501)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "数据提交不全",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else if (code.equals(502)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "账号不存在",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else if (code.equals(503)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "账号或密码不正确！",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else if (loginResult.getSuccess().equals(true)) {
+                    final Data data = loginResult.getData();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent = new Intent(MainActivity.this, Caidan.class);
+                            intent.putExtra("id", data.getIdNumber());  // 这是身份证
+                            intent.putExtra("account", data.getAccount());
+                            intent.putExtra("name", data.getName());
+                            intent.putExtra("sex", data.getSex());
+                            intent.putExtra("phone", data.getPhone());
+                            intent.putExtra("qx", data.getQx());
+                            intent.putExtra("login_password", "");
+                            intent.putExtra("pay_password", "");
+                            intent.putExtra("id_number", data.getId());  // 这是存储在数据库中的ID
+//                             String moneys=String.valueOf(c.getFloat(8));
+                            intent.putExtra("moneys", data.getMoneys());
+                            startActivity(intent);
+                        }
+                    });
+
+                } else {
+                    Toast.makeText(MainActivity.this, "注册失败，",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
     //自定义getMap()方法，显示天气信息到文本控件中
     //将城市天气信息分条展示到界面上
-    private void getMap( List list,  int number,  int iconNumber) {
+    private void getMap(List list, int number, int iconNumber) {
         Map<String, String> cityMap = (Map<String, String>) list.get(number);
-        year= cityMap.get("year");
-        num2= cityMap.get("num");
+        year = cityMap.get("year");
+        num2 = cityMap.get("num");
         name2 = cityMap.get("name2");
         tvCity3.setText(name2);
         tvYear.setText(year);
