@@ -20,24 +20,24 @@ public class Caidan extends TabActivity {
 
         intent = getIntent();
         String idss = intent.getStringExtra("id");
-        DatebaseHelper dbHelper1=new DatebaseHelper(getApplicationContext());
-        Cursor c1=dbHelper1.query(idss);
-        if(c1.getCount()!=0) {
-            c1.moveToFirst();
-            intent.putExtra("id", c1.getString(0));
-            intent.putExtra("account", c1.getString(1));
-            intent.putExtra("name", c1.getString(2));
-            intent.putExtra("sex", c1.getString(3));
-            intent.putExtra("phone", c1.getString(4));
-            intent.putExtra("qx", c1.getString(5));
-            intent.putExtra("login_password", c1.getString(6));
-            intent.putExtra("pay_password", c1.getString(7));
-            // String moneys=String.valueOf(c.getFloat(8));
-            intent.putExtra("moneys", c1.getFloat(8));
-
-        }else {
-            Log.v("数据错误！","");
-        }
+//        DatebaseHelper dbHelper1=new DatebaseHelper(getApplicationContext());
+//        Cursor c1=dbHelper1.query(idss);
+//        if(c1.getCount()!=0) {
+//            c1.moveToFirst();
+//            intent.putExtra("id", c1.getString(0));
+//            intent.putExtra("account", c1.getString(1));
+//            intent.putExtra("name", c1.getString(2));
+//            intent.putExtra("sex", c1.getString(3));
+//            intent.putExtra("phone", c1.getString(4));
+//            intent.putExtra("qx", c1.getString(5));
+//            intent.putExtra("login_password", c1.getString(6));
+//            intent.putExtra("pay_password", c1.getString(7));
+//            // String moneys=String.valueOf(c.getFloat(8));
+//            intent.putExtra("moneys", c1.getFloat(8));
+//
+//        }else {
+//            Log.v("数据错误！","");
+//        }
 
         //选项卡
 
@@ -70,34 +70,40 @@ public class Caidan extends TabActivity {
 
 
 
-        DatebaseHelper dbHelper=new DatebaseHelper(getApplicationContext());
+//        DatebaseHelper dbHelper=new DatebaseHelper(getApplicationContext());
         //Log.v("取到的值为",id);
-        Cursor c=dbHelper.query(id);
+//        Cursor c=dbHelper.query(id);
+        Intent loginIntent=new Intent(this,MyActivity.class);
+        loginIntent.putExtra("id", id);
+        loginIntent.putExtra("name", name);
+        loginIntent.putExtra("pay_password", pay_password);
+        tabhost.addTab(tabhost.newTabSpec("tabLogin").setIndicator("我的").setContent(loginIntent));
 
-        if(c.getCount()!=0){
-            c.moveToFirst();
-
-            if(!"".equals(pay_password)){
-                //intent.setClass(UserActivity.this,MyActivity.class);
-                Intent loginIntent=new Intent(this,MyActivity.class);
-                loginIntent.putExtra("id", id);
-                loginIntent.putExtra("name", name);
-                loginIntent.putExtra("pay_password", pay_password);
-                tabhost.addTab(tabhost.newTabSpec("tabLogin").setIndicator("我的").setContent(loginIntent));
-            }else {
-                // intent.setClass(UserActivity.this, paypwdActivity.class);
-                Intent loginIntent=new Intent(this,paypwdActivity.class);
-                loginIntent.putExtra("id", id);
-                loginIntent.putExtra("name", name);
-                loginIntent.putExtra("pay_password", pay_password);
-                tabhost.addTab(tabhost.newTabSpec("tabLogin").setIndicator("我的").setContent(loginIntent));
-            }
-            //  startActivity(intent);
-
-        }else {
-            Toast.makeText(Caidan.this, "数据错误！", Toast.LENGTH_SHORT).show();
-
-        }
+//        if(c.getCount()!=0){
+//            c.moveToFirst();
+//
+//            if(!"".equals(pay_password)){
+//                //intent.setClass(UserActivity.this,MyActivity.class);
+//                Intent loginIntent=new Intent(this,MyActivity.class);
+//                loginIntent.putExtra("id", id);
+//                loginIntent.putExtra("name", name);
+//                loginIntent.putExtra("pay_password", pay_password);
+//                tabhost.addTab(tabhost.newTabSpec("tabLogin").setIndicator("我的").setContent(loginIntent));
+//            }else {
+//                // intent.setClass(UserActivity.this, paypwdActivity.class);
+//                Intent loginIntent=new Intent(this,paypwdActivity.class);
+//                loginIntent.putExtra("id", id);
+//                loginIntent.putExtra("name", name);
+//                loginIntent.putExtra("pay_password", pay_password);
+//                tabhost.addTab(tabhost.newTabSpec("tabLogin").setIndicator("我的").setContent(loginIntent));
+//
+//            }
+//            //  startActivity(intent);
+//
+//        }else {
+//            Toast.makeText(Caidan.this, "数据错误！", Toast.LENGTH_SHORT).show();
+//
+//        }
 
 
 
