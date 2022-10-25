@@ -4,7 +4,7 @@ public class ApiBaseUrl {
     private final String baseUrl = "http://192.168.31.171:8081/bank/api/";
 
     public String getBaseUrl() {
-        return "http://192.168.31.171:8081/bank/api/";
+        return this.baseUrl;
     }
 
     public String assemblyUrl(String path) {
