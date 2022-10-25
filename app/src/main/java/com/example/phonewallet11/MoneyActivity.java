@@ -144,4 +144,14 @@ public class MoneyActivity extends Activity {
             }
         });
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO Auto-generated method stub
+        super.onActivityResult(requestCode, resultCode, data);
+        //调用getRelationFromDB()方法
+        if (requestCode == resultCode) {
+            getBalance();
+        }
+    }
 }

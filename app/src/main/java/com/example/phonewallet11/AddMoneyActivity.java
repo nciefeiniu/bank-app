@@ -1,5 +1,6 @@
 package com.example.phonewallet11;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -17,11 +18,30 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+
+import com.example.phonewallet11.recharge.Data;
+import com.example.phonewallet11.okhttpClientManager.clientManager;
+import com.example.phonewallet11.recharge.Recharge;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class AddMoneyActivity extends Activity {
     private EditText etmoney,etbank,etpay_pwd;
@@ -49,6 +69,7 @@ public class AddMoneyActivity extends Activity {
     private ProgressBar pb2;
     final String urlStr="http://192.168.1.3:8080/TestServer/pic/4.jpg";
 
+    @SuppressLint("MissingInflatedId")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addmoney);
@@ -333,58 +354,60 @@ public class AddMoneyActivity extends Activity {
         }else if((etpay_pwd.getText().toString()).equals("")){
             Toast.makeText(AddMoneyActivity.this, "请输入支付密码！", Toast.LENGTH_SHORT).show();
         }else{
-            float money=Float.parseFloat(etmoney.getText().toString());
+            double money=Double.parseDouble(etmoney.getText().toString());
             String card=etbank.getText().toString();
+            String password = etpay_pwd.getText().toString();
             if(money>0) {
-                //连接数据库
-                DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
-                Cursor c = dbHelper.querykb2(sfz,card );
-                if (c.getCount() !=0) {
-                    c.moveToFirst();
-                    //Log.v("chengg", "没问题");
-                    //Log.v("chengg", c.getString(1));
-
-                    DatebaseHelper dbHelper1 = new DatebaseHelper(getApplicationContext());
-                    Cursor c1 = dbHelper1.querypwd(sfz);
-                    if (c1.getCount() !=0) {
-                        c1.moveToFirst();
-                        String  paypwd=c1.getString(0);
-
-                        if(etpay_pwd.getText().toString().equals(paypwd)){
-
-                            //更新余额
-                            float money2 = money + moneys;
-                            ContentValues values = new ContentValues();
-                            values.put("money", money2);
-                            DatebaseHelper dbHelper2 = new DatebaseHelper(getApplicationContext());
-                            dbHelper2.updateuser(values, sfz);
-                            //插入记录
-                            DatebaseHelper dbHelperRecord = new DatebaseHelper(getApplicationContext());
-                            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            String time=sdf.format(new java.util.Date());
-                            final ContentValues valueRecord=new ContentValues();//存储值
-                            valueRecord.put("_id",intent.getStringExtra("id"));
-                            valueRecord.put("r_name","自己");
-                            valueRecord.put("r_mode","充值");
-                            valueRecord.put("r_money",money2);
-                            valueRecord.put("r_time",time);
-                            dbHelperRecord.insertRecord(valueRecord);
-
-                            Toast.makeText(AddMoneyActivity.this, "充值成功！", Toast.LENGTH_SHORT).show();
-                            finish();
-                            intent.putExtra("moneys", money2);
-                            intent.setClass(AddMoneyActivity.this,MoneyActivity.class);
-                            startActivity(intent);
-
-
-                        }else {
-                            etpay_pwd.setText("");
-                            Toast.makeText(AddMoneyActivity.this, "支付密码有误！", Toast.LENGTH_SHORT).show();
-                        } }
-                } else {
-                    etbank.setText("");
-                    Toast.makeText(AddMoneyActivity.this, "银行卡号有误或不存在！", Toast.LENGTH_SHORT).show();
-                }
+                this.rechage(money, card, password);
+//              //  连接数据库
+//                DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
+//                Cursor c = dbHelper.querykb2(sfz,card );
+//                if (c.getCount() !=0) {
+//                    c.moveToFirst();
+//                    //Log.v("chengg", "没问题");
+//                    //Log.v("chengg", c.getString(1));
+//
+//                    DatebaseHelper dbHelper1 = new DatebaseHelper(getApplicationContext());
+//                    Cursor c1 = dbHelper1.querypwd(sfz);
+//                    if (c1.getCount() !=0) {
+//                        c1.moveToFirst();
+//                        String  paypwd=c1.getString(0);
+//
+//                        if(etpay_pwd.getText().toString().equals(paypwd)){
+//
+//                            //更新余额
+//                            float money2 = money + moneys;
+//                            ContentValues values = new ContentValues();
+//                            values.put("money", money2);
+//                            DatebaseHelper dbHelper2 = new DatebaseHelper(getApplicationContext());
+//                            dbHelper2.updateuser(values, sfz);
+//                            //插入记录
+//                            DatebaseHelper dbHelperRecord = new DatebaseHelper(getApplicationContext());
+//                            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                            String time=sdf.format(new java.util.Date());
+//                            final ContentValues valueRecord=new ContentValues();//存储值
+//                            valueRecord.put("_id",intent.getStringExtra("id"));
+//                            valueRecord.put("r_name","自己");
+//                            valueRecord.put("r_mode","充值");
+//                            valueRecord.put("r_money",money2);
+//                            valueRecord.put("r_time",time);
+//                            dbHelperRecord.insertRecord(valueRecord);
+//
+//                            Toast.makeText(AddMoneyActivity.this, "充值成功！", Toast.LENGTH_SHORT).show();
+//                            finish();
+//                            intent.putExtra("moneys", money2);
+//                            intent.setClass(AddMoneyActivity.this,MoneyActivity.class);
+//                            startActivity(intent);
+//
+//
+//                        }else {
+//                            etpay_pwd.setText("");
+//                            Toast.makeText(AddMoneyActivity.this, "支付密码有误！", Toast.LENGTH_SHORT).show();
+//                        } }
+//                } else {
+//                    etbank.setText("");
+//                    Toast.makeText(AddMoneyActivity.this, "银行卡号有误或不存在！", Toast.LENGTH_SHORT).show();
+//                }
             }
             else{
                 etmoney.setText("");
@@ -394,4 +417,57 @@ public class AddMoneyActivity extends Activity {
 
     }
 
+    public void rechage(double money, String cardNo, String password) {
+        // 充值
+        final Gson gson = new Gson();
+
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        JSONObject json = new JSONObject();
+        try {
+            json.put("money", money);
+            json.put("pay_password", password);
+            json.put("card_no", cardNo);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        OkHttpClient client = clientManager.getInstance().mOkHttpClient; // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("recharge/");
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+
+        Request request = new Request.Builder().url(url).post(requestBody).build(); // 创建一个请求
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                final Recharge rechargeResult = gson.fromJson(response.body().charStream(), Recharge.class);
+                Integer code = rechargeResult.getCode();
+                if (!code.equals(200)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(AddMoneyActivity.this, rechargeResult.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    final Data data = rechargeResult.getData();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(AddMoneyActivity.this, "充值成功！", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(AddMoneyActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 }
