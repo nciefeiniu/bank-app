@@ -15,8 +15,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.phonewallet11.BuyStock.BuyStock;
+import com.example.phonewallet11.okhttpClientManager.clientManager;
+import com.example.phonewallet11.rechargePhone.RechargePhone;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -26,8 +32,11 @@ import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class GpActivity extends AppCompatActivity {
@@ -119,7 +128,8 @@ public class GpActivity extends AppCompatActivity {
                 dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Toast.makeText(GpActivity.this, "购买成功！", Toast.LENGTH_SHORT).show();
+                        GpActivity.this.buyStock(10,"600519", "afawf");
+//                        Toast.makeText(GpActivity.this, "购买成功！", Toast.LENGTH_SHORT).show();
 
                     }
                 });
@@ -206,6 +216,58 @@ public class GpActivity extends AppCompatActivity {
         tvzyj6.setText(gongsi);
         tvzyj7.setText(mujiqi);
         ivzyj.setImageResource(iconNumber);
+    }
+
+    public void buyStock(double money, String stock, String password) {
+        // 购买股票
+        final Gson gson = new Gson();
+
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        JSONObject json = new JSONObject();
+        try {
+            json.put("money", money);
+            json.put("pay_password", password);
+            json.put("stock_number", stock);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        OkHttpClient client = clientManager.getInstance().mOkHttpClient; // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("buy_stock/");
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+
+        Request request = new Request.Builder().url(url).post(requestBody).build(); // 创建一个请求
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                final BuyStock buyStockResult = gson.fromJson(response.body().charStream(), BuyStock.class);
+                Integer code = buyStockResult.getCode();
+                if (!code.equals(200)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(GpActivity.this, buyStockResult.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(GpActivity.this, "购买股票成功！ 购买：" + buyStockResult.getData().getPurchaseAmount() + '元', Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(GpActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }
