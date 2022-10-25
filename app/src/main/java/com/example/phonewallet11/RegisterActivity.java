@@ -178,10 +178,6 @@ public class RegisterActivity extends Activity {
         super.onDestroy();
     }
 
-
-    //
-
-
     public void register(View v) {
         if (name.getText().toString().equals("") || (account.getText().toString()).equals("") || login_password.getText().toString().equals("")) {
             Toast.makeText(RegisterActivity.this, "请先填写资料！", Toast.LENGTH_SHORT).show();
