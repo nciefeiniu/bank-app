@@ -15,11 +15,30 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.example.phonewallet11.okhttpClientManager.clientManager;
+import com.example.phonewallet11.rechargePhone.RechargePhone;
+import com.example.phonewallet11.withDrawal.WithDrawal;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class ShoujiActivity extends Activity {
     private EditText phone,pay_money,pay_password;
@@ -71,70 +90,140 @@ public class ShoujiActivity extends Activity {
             public void onClick(View v) {
                 final String name=phone.getText().toString();
                 final String pwd=pay_password.getText().toString();
-                //判断是否联网
-                if(checkNetworkState()!=true){
-                    Toast.makeText(ShoujiActivity.this,"网络没有打开，请打开网络后再试。",Toast.LENGTH_LONG).show();
-                }else {
-                    if (name.equals("")) {
-                        Toast toast = Toast.makeText(ShoujiActivity.this,
-                                "输入用户名", Toast.LENGTH_LONG);
-                        toast.show();
-                    } else if (pwd.equals("")) {
-                        Toast toast = Toast.makeText(ShoujiActivity.this,
-                                "输入密码", Toast.LENGTH_LONG);
-                        toast.show();
-                    } else {
-                        //新建线程，并通过get或post方式把用户名和密码向服务器发送请求并将结果发送给Handler对象
-                        //使用try-catch-finally捕获异常
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                String urlStr="http://192.168.43.222:8080/TestServer/servlet/Login";
-                                try {
-                                    url=new URL(urlStr);
-                                    uc= (HttpURLConnection) url.openConnection();
-                                    uc.setRequestMethod("POST");
-                                  // POST方式向服务器发出请求时需要在请求后加上实体，
-                                    // 向服务器提交的参数在请求后的实体中
-                                    //POST的重点是向服务器发送数据
-                                    uc.setConnectTimeout(5000);
-                                    String data="name="+ URLEncoder.encode(name)+"&pass="+URLEncoder.encode(pwd);
-                                    //设置请求头数据提交方式，
-                                    uc.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-                                    //设置长度
-                                    uc.setRequestProperty("Content-Length",data.length()+"");
-                                    uc.setDoOutput(true);
-                                    uc.connect();
+//                final double money = Double.parseDouble(pay_money.getText().toString());
+                final String money = pay_money.getText().toString();
 
-                                    OutputStream outputStream=uc.getOutputStream();
-                                    outputStream.write(data.getBytes());
-
-                                    int code=uc.getResponseCode();
-                                    System.out.println(code);
-                                    if(code==HttpURLConnection.HTTP_OK){
-                                        InputStream inputStream= uc.getInputStream();
-                                        int i=inputStream.read();
-                                        //Message数据传递handler.sendMessage()
-                                        Message message=Message.obtain();
-                                        message.arg1=i;
-                                        handler.sendMessage(message);
-                                    }else {
-                                        Message message=Message.obtain();
-                                        message.arg1=2;
-                                        handler.sendMessage(message);
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }finally {
-                                    if(uc!=null){
-                                        uc.disconnect();
-                                    }
-                                }
-                            }
-                        }).start();
-
-                    }
+                if (name.equals("")) {
+                    Toast toast = Toast.makeText(ShoujiActivity.this,
+                            "输入用户名", Toast.LENGTH_LONG);
+                    toast.show();
+                } else if (pwd.equals("")) {
+                    Toast toast = Toast.makeText(ShoujiActivity.this,
+                            "输入密码", Toast.LENGTH_LONG);
+                    toast.show();
+                } else if (money.equals("")) {
+                    Toast toast = Toast.makeText(ShoujiActivity.this,
+                            "输入密码", Toast.LENGTH_LONG);
+                    toast.show();
+                } else {
+                    double _money = Double.parseDouble(money);
+                    ShoujiActivity.this.rechargePhoneBill(_money, name, pwd);
                 }
+                //判断是否联网
+//                if(checkNetworkState()!=true){
+//                    Toast.makeText(ShoujiActivity.this,"网络没有打开，请打开网络后再试。",Toast.LENGTH_LONG).show();
+//                }else {
+//                    if (name.equals("")) {
+//                        Toast toast = Toast.makeText(ShoujiActivity.this,
+//                                "输入用户名", Toast.LENGTH_LONG);
+//                        toast.show();
+//                    } else if (pwd.equals("")) {
+//                        Toast toast = Toast.makeText(ShoujiActivity.this,
+//                                "输入密码", Toast.LENGTH_LONG);
+//                        toast.show();
+//                    } else {
+//                        //新建线程，并通过get或post方式把用户名和密码向服务器发送请求并将结果发送给Handler对象
+//                        //使用try-catch-finally捕获异常
+//                        new Thread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                String urlStr="http://192.168.43.222:8080/TestServer/servlet/Login";
+//                                try {
+//                                    url=new URL(urlStr);
+//                                    uc= (HttpURLConnection) url.openConnection();
+//                                    uc.setRequestMethod("POST");
+//                                  // POST方式向服务器发出请求时需要在请求后加上实体，
+//                                    // 向服务器提交的参数在请求后的实体中
+//                                    //POST的重点是向服务器发送数据
+//                                    uc.setConnectTimeout(5000);
+//                                    String data="name="+ URLEncoder.encode(name)+"&pass="+URLEncoder.encode(pwd);
+//                                    //设置请求头数据提交方式，
+//                                    uc.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+//                                    //设置长度
+//                                    uc.setRequestProperty("Content-Length",data.length()+"");
+//                                    uc.setDoOutput(true);
+//                                    uc.connect();
+//
+//                                    OutputStream outputStream=uc.getOutputStream();
+//                                    outputStream.write(data.getBytes());
+//
+//                                    int code=uc.getResponseCode();
+//                                    System.out.println(code);
+//                                    if(code==HttpURLConnection.HTTP_OK){
+//                                        InputStream inputStream= uc.getInputStream();
+//                                        int i=inputStream.read();
+//                                        //Message数据传递handler.sendMessage()
+//                                        Message message=Message.obtain();
+//                                        message.arg1=i;
+//                                        handler.sendMessage(message);
+//                                    }else {
+//                                        Message message=Message.obtain();
+//                                        message.arg1=2;
+//                                        handler.sendMessage(message);
+//                                    }
+//                                } catch (Exception e) {
+//                                    e.printStackTrace();
+//                                }finally {
+//                                    if(uc!=null){
+//                                        uc.disconnect();
+//                                    }
+//                                }
+//                            }
+//                        }).start();
+//
+//                    }
+//                }
+            }
+        });
+    }
+
+    public void rechargePhoneBill(double money, String name, String password) {
+        final Gson gson = new Gson();
+
+        MediaType JSON = MediaType.parse("application/json;charset=utf-8");
+        JSONObject json = new JSONObject();
+        try {
+            json.put("money", money);
+            json.put("pay_password", password);
+            json.put("name", name);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        OkHttpClient client = clientManager.getInstance().mOkHttpClient; // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("recharge_phone_bill/");
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+
+        Request request = new Request.Builder().url(url).post(requestBody).build(); // 创建一个请求
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                final RechargePhone rechargePhoneResult = gson.fromJson(response.body().charStream(), RechargePhone.class);
+                Integer code = rechargePhoneResult.getCode();
+                if (!code.equals(200)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ShoujiActivity.this, rechargePhoneResult.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ShoujiActivity.this, "充值成功！", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(ShoujiActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
             }
         });
     }
