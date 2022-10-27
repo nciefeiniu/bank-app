@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -15,14 +16,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.phonewallet11.api_response.login.Data;
-import com.example.phonewallet11.api_response.login.Login;
 import com.example.phonewallet11.cards.Datum;
 import com.example.phonewallet11.cards.GetAllCards;
+import com.example.phonewallet11.delCard.DelCard;
 import com.example.phonewallet11.okhttpClientManager.clientManager;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -51,21 +52,10 @@ public class CardActivity extends AppCompatActivity {
 
     private void getRelationFromDB() {
         // TODO Auto-generated method stub
-        final DatebaseHelper dbHelper = new DatebaseHelper(getApplicationContext());
-        Cursor c = dbHelper.querykb(sfz);
-        //将查询到的联系人信息按照relationlist.xml布局方式显示到ListView中
-        String[] from = new String[]{"_id","k_phone"};  // _id 就是银行账号
-        int[] to = new int[]{R.id.tvNum, R.id.tvPhone};
-
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.kblist, c, from, to);
-        list.setAdapter(adapter);
-
+        this.getAllCards();
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, final long id) {
-
-
-
+            public void onItemClick(AdapterView<?> parent, final View view, int position, final long id) {
                 final long temp = id;
                 //利用对话框实现删除记录的提示操作
                 AlertDialog.Builder builder = new AlertDialog.Builder(CardActivity.this);
@@ -74,12 +64,10 @@ public class CardActivity extends AppCompatActivity {
 
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        dbHelper.delkb((int)temp);
-                        Cursor c = dbHelper.querykb(sfz);
-                        String[] from = new String[]{"_id", "k_phone"};
-                        int[] to = new int[]{R.id.tvNum, R.id.tvPhone};
-                        SimpleCursorAdapter adapter = new SimpleCursorAdapter(getApplicationContext(), R.layout.kblist, c, from, to);
-                        list.setAdapter(adapter);
+                        System.out.println(temp);
+                        TextView tv_name = (TextView) view.findViewById(R.id.tvNum);
+                        String cardNo = tv_name.getText().toString();
+                        CardActivity.this.delCard(cardNo);
                     }
                 });
                 builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -92,7 +80,7 @@ public class CardActivity extends AppCompatActivity {
                 builder.create().show();
             }
         });
-        dbHelper.close();
+//        dbHelper.close();
 
 
     }
@@ -127,9 +115,13 @@ public class CardActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            for (int i = 0; i < cardsResult.getData().size(); i++) {
-
+                            List<Datum> resultData = cardsResult.getData();
+                            String[] array2 = new String[resultData.size()];
+                            for (int i=0; i<resultData.size(); i++) {
+                                array2[i] = resultData.get(i).getCardNo();
                             }
+                            ArrayAdapter<String> adapter=new ArrayAdapter<String>(CardActivity.this, R.layout.kblist, R.id.tvNum, array2);
+                            list.setAdapter(adapter);
                         }
                     });
 
@@ -144,7 +136,51 @@ public class CardActivity extends AppCompatActivity {
                 Toast.makeText(CardActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
 
+    public void delCard(String cardNo){
+        final Gson gson = new Gson();
+
+        OkHttpClient client = clientManager.getInstance().mOkHttpClient; // 创建OkHttpClient对象
+        String url = new ApiBaseUrl().assemblyUrl("del_card/") + "?card_no=" + cardNo;
+        Request request = new Request.Builder().url(url).build(); // 创建一个请求
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                final DelCard delResult = gson.fromJson(response.body().charStream(), DelCard.class);
+                Integer code = delResult.getCode();
+                if (!code.equals(200)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(CardActivity.this, delResult.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else if (delResult.getSuccess().equals(true)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(CardActivity.this, delResult.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                            CardActivity.this.invalidateOptionsMenu();  // 刷新界面
+                            CardActivity.this.getAllCards();
+                        }
+                    });
+
+                } else {
+                    Toast.makeText(CardActivity.this, "注册失败，",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(CardActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
