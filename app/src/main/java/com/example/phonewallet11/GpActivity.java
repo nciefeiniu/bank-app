@@ -48,23 +48,23 @@ public class GpActivity extends AppCompatActivity {
     private TextView tvzyj6;
     private TextView tvzyj7;
     private ImageView ivzyj;
-    private Button btnzyj1, btnzyj2, btnzyj3,btnzyj4,btnzyj5;
+    private Button btnzyj1, btnzyj2, btnzyj3, btnzyj4, btnzyj5;
     private Map<String, String> map;
-    private  List<Map<String, String>> list;
-    private String bianhao,price,name,time,area,gongsi,mujiqi;
+    private List<Map<String, String>> list;
+    private String bianhao, price, name, time, area, gongsi, mujiqi;
     String urlStr = "http://192.168.43.222:8080/TestServer/num.json";
 
-    final Handler handler=new Handler(){
+    final Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             //获取子线程传递过来的json数据并保存到变量中
-            String json= (String) msg.obj;
+            String json = (String) msg.obj;
             List<NumInfo> numInfos = null;
 
             //调用getInfosFromJson()方法，将天气信息集合保存到weatherInfos中
             try {
-                numInfos=getInfosFromJson(json);
+                numInfos = getInfosFromJson(json);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -87,13 +87,16 @@ public class GpActivity extends AppCompatActivity {
 
         }
     };
+
     //解析json数据返回天气信息的集合
     public static List getInfosFromJson(String json)
-            throws IOException {        ;
+            throws IOException {
+        ;
         //使用gson库解析JSON数据
-        Gson gson=new Gson();
-        Type listType=new TypeToken<List<NumInfo>>(){}.getType();
-        List<NumInfo>list=gson.fromJson(json,listType);
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<NumInfo>>() {
+        }.getType();
+        List<NumInfo> list = gson.fromJson(json, listType);
 
         return list;
     }
@@ -128,7 +131,7 @@ public class GpActivity extends AppCompatActivity {
                 dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        GpActivity.this.buyStock(10,"600519", "afawf");
+                        GpActivity.this.buyStock(10, "600519", "afawf");
 //                        Toast.makeText(GpActivity.this, "购买成功！", Toast.LENGTH_SHORT).show();
 
                     }
@@ -145,35 +148,31 @@ public class GpActivity extends AppCompatActivity {
         });
 
 
-
-                btnzyj4.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(GpActivity.this, GmActivity.class);
-                        startActivity(intent);
-                    }
-                });
+        btnzyj4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(GpActivity.this, GmActivity.class);
+                startActivity(intent);
+            }
+        });
         //通过OkHttp的get同步方式访问服务器，并将获取到的json数据封装到消息中发送给UI线程
         new Thread(new Runnable() {
             @Override
             public void run() {
-                OkHttpClient client=new OkHttpClient();
-                Request request=new Request.Builder().url(urlStr).build();
-                Call call=client.newCall(request);
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder().url(urlStr).build();
+                Call call = client.newCall(request);
                 try {
-                    Response response=call.execute();
-                    String result=response.body().string();
-                    Message message=Message.obtain();
-                    message.obj=result;
+                    Response response = call.execute();
+                    String result = response.body().string();
+                    Message message = Message.obtain();
+                    message.obj = result;
                     handler.sendMessage(message);
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }).start();
-
-
-
 
 
         View.OnClickListener listener = new View.OnClickListener() {
@@ -199,10 +198,10 @@ public class GpActivity extends AppCompatActivity {
 
     //自定义getMap()方法，显示天气信息到文本控件中
     //将城市天气信息分条展示到界面上
-    private void getMap( List list,  int number,  int iconNumber) {
+    private void getMap(List list, int number, int iconNumber) {
         Map<String, String> cityMap = (Map<String, String>) list.get(number);
         time = cityMap.get("time");
-        price= cityMap.get("price");
+        price = cityMap.get("price");
         name = cityMap.get("name");
         mujiqi = cityMap.get("mujiqi");
         area = cityMap.get("area");
